@@ -11,7 +11,7 @@ import io
 import os
 import asyncio
 import requests
-server = "describing-bones-alan-mv.trycloudflare.com"
+server = "optimal-shot-operations-do.trycloudflare.com"
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
@@ -34,7 +34,7 @@ async def connect_to_comfy(server_address: str):
 
 @router.post("/queue_prompt")
 async def queue_prompt_route(prompt_data: dict):
-    server_address = "describing-bones-alan-mv.trycloudflare.com"
+    server_address = server
     client_id = str(uuid.uuid4())
     prompt = prompt_data.get("workflow_data", {})
 
@@ -73,7 +73,7 @@ async def create_prompt(request_data: dict):
     return result
 
 @router.get("/get_history")
-async def get_history(server_address: str = Query("describing-bones-alan-mv.trycloudflare.com")):
+async def get_history(server_address: str = Query(server)):
     try:
         response = requests.get(f"http://{server_address}/history")
         response.raise_for_status()
@@ -83,7 +83,7 @@ async def get_history(server_address: str = Query("describing-bones-alan-mv.tryc
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/track_progress/{prompt_id}")
-async def track_progress_route(prompt_id: str, server_address: str = Query("describing-bones-alan-mv.trycloudflare.com")):
+async def track_progress_route(prompt_id: str, server_address: str = Query(server)):
     try:
         progress = track_progress(server_address, prompt_id)
         if "error" in progress:
@@ -94,7 +94,7 @@ async def track_progress_route(prompt_id: str, server_address: str = Query("desc
         raise HTTPException(status_code=500, detail=str(e))
     
 @router.get("/get_image")
-async def get_image_route(filename: str = Query(...), server_address: str = Query("describing-bones-alan-mv.trycloudflare.com")):
+async def get_image_route(filename: str = Query(...), server_address: str = Query(server)):
     try:
         image_data = get_image(server_address, filename)
         if "error" in image_data:
@@ -124,7 +124,7 @@ async def generate_image(request_data: dict):
                 raise HTTPException(status_code=400, detail="No workflow_data in request and tutorial.json not found")
 
         # Use default server_address and generate a new client_id
-        server_address = "describing-bones-alan-mv.trycloudflare.com"
+        server_address = server
         client_id = str(uuid.uuid4())
 
         # Pass the workflow_data directly to queue_prompt
@@ -160,7 +160,7 @@ def allowed_file(filename: str) -> bool:
 @router.post("/upload_image")
 async def upload_image_endpoint(
     image: UploadFile = File(...),
-    server_address: str = Form("describing-bones-alan-mv.trycloudflare.com"),
+    server_address: str = Form(server),
     filename: str = Form(...),
     folder_type: str = Form("input"),
     image_type: str = Form("image"),
