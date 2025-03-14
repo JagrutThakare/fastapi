@@ -1,0 +1,111 @@
+{
+    "prompt": {
+        "3": {
+            "inputs": {
+                "seed": 156680208700286,
+                "steps": 20,
+                "cfg": 8,
+                "sampler_name": "euler",
+                "scheduler": "normal",
+                "denoise": 1,
+                "model": [
+                    "4",
+                    0
+                ],
+                "positive": [
+                    "6",
+                    0
+                ],
+                "negative": [
+                    "7",
+                    0
+                ],
+                "latent_image": [
+                    "5",
+                    0
+                ]
+            },
+            "class_type": "KSampler",
+            "_meta": {
+                "title": "KSampler"
+            }
+        },
+        "4": {
+            "inputs": {
+                "ckpt_name": "SD2.1/v2-1_512-ema-pruned.safetensors"
+            },
+            "class_type": "CheckpointLoaderSimple",
+            "_meta": {
+                "title": "Load Checkpoint"
+            }
+        },
+        "5": {
+            "inputs": {
+                "width": 512,
+                "height": 512,
+                "batch_size": 1
+            },
+            "class_type": "EmptyLatentImage",
+            "_meta": {
+                "title": "Empty Latent Image"
+            }
+        },
+        "6": {
+            "inputs": {
+                "text": "Create an energetic digital art piece showcasing the new 15-inch MacBook Air in a captivating scene. Feature it from an unusual perspective, such as a bird's eye view or diagonal angle, floating effortlessly against a backdrop of urban lights. Embrace a high-contrast color palette, using bright neon hues for accents. Incorporate bold typography that reads 'The 15-Inch MacBook Air Has Finally Come Into Its Own', with each word slightly overlapping for dynamic flow. Add subtle Apple brand elements throughout the design while maintaining a cohesive aesthetic.",
+                "clip": [
+                    "4",
+                    1
+                ]
+            },
+            "class_type": "CLIPTextEncode",
+            "_meta": {
+                "title": "CLIP Text Encode (Prompt)"
+            }
+        },
+        "7": {
+            "inputs": {
+                "text": "Do not use flat or dull colors, avoid conventional compositions, refrain from placing excessive emphasis on text, and do not make the product integration appear forceful or out of place. Avoid cluttered backgrounds and ensure there is ample negative space for the MacBook Air to stand out. Do not create an overwhelmingly busy design that distracts from the key message",
+                "clip": [
+                    "4",
+                    1
+                ]
+            },
+            "class_type": "CLIPTextEncode",
+            "_meta": {
+                "title": "CLIP Text Encode (Prompt)"
+            }
+        },
+        "8": {
+            "inputs": {
+                "samples": [
+                    "3",
+                    0
+                ],
+                "vae": [
+                    "4",
+                    2
+                ]
+            },
+            "class_type": "VAEDecode",
+            "_meta": {
+                "title": "VAE Decode"
+            }
+        },
+        "9": {
+            "inputs": {
+                "filename_prefix": "ComfyUI",
+                "images": [
+                    "8",
+                    0
+                ]
+            },
+            "class_type": "SaveImage",
+            "_meta": {
+                "title": "Save Image"
+            }
+        }
+    },
+    "client_id": "a598a297-5bf3-46b2-8ddc-8629691cf7a8",
+    "server_address": "independently-penetration-dice-failed.trycloudflare.com"
+}

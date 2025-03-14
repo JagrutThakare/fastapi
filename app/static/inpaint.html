@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inpaint Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .image-preview {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .image-preview img {
+            max-width: 45%;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Inpaint Tool</h1>
+        <hr>
+        
+        <label for="normalImage">Upload Normal Image:</label>
+        <input type="file" id="normalImage" accept="image/*" onchange="previewImage(event, 'normalPreview')">
+        <br><br>
+        
+        <label for="maskedImage">Upload Masked Image:</label>
+        <input type="file" id="maskedImage" accept="image/*" onchange="previewImage(event, 'maskedPreview')">
+        
+        <div class="image-preview">
+            <div>
+                <h3>Normal Image Preview</h3>
+                <img id="normalPreview" src="#" alt="Normal Image Preview">
+            </div>
+            <div>
+                <h3>Masked Image Preview</h3>
+                <img id="maskedPreview" src="#" alt="Masked Image Preview">
+            </div>
+        </div>
+    </div>
+    <script src="/static/inpaint.js"></script>
+</body>
+</html>

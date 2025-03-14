@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prompt Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-container { max-width: 600px; }
+        .input-group { margin: 10px 0; }
+        label { display: inline-block; width: 150px; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+        .search-container { display: flex; align-items: center; margin-top: 10px; }
+        .search-container input { flex: 1; margin-right: 10px; }
+
+        /* Added styles for the result div and image */
+        #result {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 100px;
+            white-space: pre-wrap;
+        }
+        #result.loading {
+            opacity: 0.6;
+        }
+        #result .image-loading {
+            color: #555;
+            font-style: italic;
+        }
+        #result .generated-image {
+            max-width: 100%;
+            height: auto;
+            margin-top: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #result .error-message {
+            color: #d32f2f;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Prompt Generator</h1>
+    <hr>
+    <div class="form-container">
+        <div class="input-group">
+            <label for="categorySelect">Select News Category:</label>
+            <select id="categorySelect" onchange="loadNewsByCategory()">
+                <option value="">Select Category</option>
+                <option value="WORLD">World</option>
+                <option value="NATION">Nation</option>
+                <option value="BUSINESS">Business</option>
+                <option value="TECHNOLOGY">Technology</option>
+                <option value="ENTERTAINMENT">Entertainment</option>
+                <option value="SPORTS">Sports</option>
+                <option value="SCIENCE">Science</option>
+                <option value="HEALTH">Health</option>
+            </select>
+        </div>
+        <h4><b>OR</b></h4>
+        <div class="input-group">
+            <label for="topicSearch">Search Topic:</label>
+            <div class="search-container">
+                <input type="text" id="topicSearch" placeholder="Enter a topic (e.g., Climate Change)" />
+                <button onclick="loadNewsByTopic()">Search</button>
+            </div>
+        </div>
+        <hr>
+        <div class="input-group">
+            <label for="newsSelect">Select News (Trend):</label>
+            <select id="newsSelect">
+                <option value="">-- Select News --</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="postTypeSelect">Select Post Type:</label>
+            <select id="postTypeSelect" onchange="loadForm()">
+                <option value="">-- Select --</option>
+            </select>
+        </div>
+        <div id="formFields"></div>
+        <button id="generateBtn" onclick="generatePrompt()" disabled>Generate</button>
+        <button id="updateTrendsBtn" onclick="updateTrends()">Update Trends</button>
+    </div>
+    <hr>
+    <h2>Generated Prompt</h2>
+    <pre id="result"></pre>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
