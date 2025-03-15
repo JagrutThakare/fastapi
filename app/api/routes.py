@@ -311,11 +311,9 @@ async def inpaint(
         # Upload image
         await image.seek(0)
         image_files = {"image": (image.filename, image.file, "image/png")}
-        data = {"type": "input", "overwrite": "false"}
-        img_response = requests.post(f"http://{server}/upload/image", files=image_files, data=data)
+        img_response = requests.post(f"http://{server}/upload/image", files=image_files, data={"type": "input", "overwrite": "false"})
 
         if img_response.status_code != 200:
-            print(f"Image upload failed: {img_response.text}")
             raise HTTPException(status_code=img_response.status_code, detail="Failed to upload image")
 
         image_name = img_response.json().get("name")
@@ -324,64 +322,75 @@ async def inpaint(
         # Upload mask
         await mask.seek(0)
         mask_files = {"image": (mask.filename, mask.file, "image/png")}
-        mask_data = {
-            "type": "input",
-            "overwrite": "false",
-        }
-        mask_response = requests.post(f"http://{server}/upload/image", files=mask_files, data=mask_data)
+        mask_response = requests.post(f"http://{server}/upload/image", files=mask_files, data={"type": "input", "overwrite": "false"})
 
         if mask_response.status_code != 200:
-            print(f"Mask upload failed: {mask_response.text}")
-            raise HTTPException(status_code=mask_response.status_code, detail=mask_response.text)
+            raise HTTPException(status_code=mask_response.status_code, detail="Failed to upload mask")
 
         mask_name = mask_response.json().get("name")
         print(f"Uploaded mask: {mask_name}")
 
-        
         # Update JSON with uploaded file names
         prompt["58"]["inputs"]["image"] = image_name
         prompt["62"]["inputs"]["image"] = mask_name
         prompt["51"]["inputs"]["text"] = negative_prompt
         prompt["59"]["inputs"]["text"] = positive_prompt
-        
+
         print("JSON Updated")
-        
+
         # Connect to WebSocket
         ws.connect(f"ws://{server}/ws?clientId={client_id}")
 
         # Send prompt
-        data = {"prompt": prompt, "client_id": client_id}
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(f"http://{server}/prompt", json=data, headers=headers)
-
-        print(response.json())
-        
-        # Get image name by prompt id
-        prompt_id = response.json().get("prompt_id")
-        response = requests.request("GET", f"http://{server}/history/{prompt_id}", headers={}, data={})
-        
-        image_path = response.json().get(f"{prompt_id}").get("outputs").get("60").get("images")[0]["filename"]
-        print(f"Image file name {image_path}")
-        
-        # Fetching Image 
-        response = requests.request("GET", f"http://{server}/view?filename={image_path}&subfolder=&type=output", headers={}, data={})
+        response = requests.post(f"http://{server}/prompt", json={"prompt": prompt, "client_id": client_id}, headers={"Content-Type": "application/json"})
         
         if response.status_code != 200:
-            print(f"Prompt submission failed: {response.text}")
-            raise HTTPException(status_code=response.status_code, detail=response.text)
+            raise HTTPException(status_code=response.status_code, detail="Failed to send prompt")
 
-        return response.json()
+        response_data = response.json()
+        prompt_id = response_data.get("prompt_id")
+
+        if not prompt_id:
+            raise HTTPException(status_code=500, detail="Failed to retrieve prompt ID")
+
+        print(f"Prompt submitted successfully. Prompt ID: {prompt_id}")
+
+        # Wait for image to be ready
+        max_retries = 30
+        delay = 2
+        image_path = None
+
+        for attempt in range(max_retries):
+            print(f"Checking image status... (Attempt {attempt + 1}/{max_retries})")
+            history_response = requests.get(f"http://{server}/history/{prompt_id}")
+
+            if history_response.status_code == 200:
+                history_data = history_response.json()
+                if history_data.get(f"{prompt_id}") and "outputs" in history_data[f"{prompt_id}"]:
+                    try:
+                        image_path = history_data[f"{prompt_id}"]["outputs"]["60"]["images"][0]["filename"]
+                        print(f"Image is ready: {image_path}")
+                        break
+                    except (KeyError, IndexError):
+                        pass  # Image is not yet available
+
+            await asyncio.sleep(delay)
+        
+        if not image_path:
+            raise HTTPException(status_code=500, detail="Timed out waiting for generated image")
+
+        # Fetch the final image
+        img_response = requests.get(f"http://{server}/view?filename={image_path}&subfolder=&type=output", stream=True)
+
+        if img_response.status_code != 200:
+            raise HTTPException(status_code=img_response.status_code, detail="Failed to fetch generated image")
+
+        # Return the image
+        return StreamingResponse(img_response.raw, media_type="image/png")
 
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON file")
-
     except Exception as e:
-        print(f"Unexpected error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
     finally:
         ws.close()
-    
-    
-    
-    
