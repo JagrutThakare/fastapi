@@ -11,7 +11,7 @@ import io
 import os
 import asyncio
 import requests
-server = "optimal-shot-operations-do.trycloudflare.com"
+server = "damage-romantic-environmental-rome.trycloudflare.com"
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
@@ -294,6 +294,8 @@ async def connect_to_comfy_endpoint(request_data: dict):
     
 @router.post("/inpaint")
 async def inpaint(
+    positive_prompt: str = Form(...),
+    negative_prompt: str = Form(...),
     prompt_file: UploadFile = File(...),
     image: UploadFile = File(...),
     mask: UploadFile = File(...)
@@ -339,6 +341,9 @@ async def inpaint(
         # Update JSON with uploaded file names
         prompt["58"]["inputs"]["image"] = image_name
         prompt["62"]["inputs"]["image"] = mask_name
+        prompt["51"]["inputs"]["text"] = negative_prompt
+        prompt["59"]["inputs"]["text"] = positive_prompt
+        
         print("JSON Updated")
         
         # Connect to WebSocket
@@ -350,6 +355,17 @@ async def inpaint(
         response = requests.post(f"http://{server}/prompt", json=data, headers=headers)
 
         print(response.json())
+        
+        # Get image name by prompt id
+        prompt_id = response.json().get("prompt_id")
+        response = requests.request("GET", f"http://{server}/history/{prompt_id}", headers={}, data={})
+        
+        image_path = response.json().get(f"{prompt_id}").get("outputs").get("60").get("images")[0]["filename"]
+        print(f"Image file name {image_path}")
+        
+        # Fetching Image 
+        response = requests.request("GET", f"http://{server}/view?filename={image_path}&subfolder=&type=output", headers={}, data={})
+        
         if response.status_code != 200:
             print(f"Prompt submission failed: {response.text}")
             raise HTTPException(status_code=response.status_code, detail=response.text)
