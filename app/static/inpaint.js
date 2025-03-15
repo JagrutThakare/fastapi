@@ -82,7 +82,7 @@ sendToComfyBtn.addEventListener("click", async () => {
 
     try {
         // Fetch the existing workflow JSON
-        const workflowResponse = await fetch("app/assets/inpaint_api.json");
+        const workflowResponse = await fetch("./assets/inpaint_api.json");
         if (!workflowResponse.ok) throw new Error("Failed to load workflow JSON");
         const jsonBlob = await workflowResponse.blob();
 
